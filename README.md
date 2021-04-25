@@ -139,15 +139,19 @@ The expected output in this case is a array containing the file count, the total
 I have provided a Dockerfile that you can run this application with a provider like Docker, for example.
 ### Prerequisites
 In order to use, first you are going to need a MongoDB connection string (I recommend MongoDB Atlas, that is the one I used in this project) in the following format:
+
 ```
 URI="mongodb+srv://<MONGO_USER_NAME>:<MONGO_USER_PASSWORD>@mongodb-cluster.xqjcn.gcp.mongodb.net/GitHubApi?retryWrites=true&w=majority"
 
 ```
+
 Please remember to substitute the following parameter with your own credentials.
+
 ```
 <MONGO_USER_NAME>
 <MONGO_USER_PASSWORD>
 ```
+
 <p>
 For the next steps, I assume you have Docker installed and that you are able to access it though a terminal. If you haven't, you can follow <a href="https://docs.docker.com/desktop/">this</a> tutorial.
 <p>
@@ -156,10 +160,13 @@ You also need to have a Java SDK version 11, Maven version 3.8.1 or superior and
 I suggest installing Amazon Corretto, which is a jdk provided by Amazon Web Services.
 <p>
 To verify that your setup is okey, run the following command in you favorite terminal.
+
 ```
 mvn --version
 ```
+
 This should return something like this:
+
 ```
 Apache Maven 3.8.1 (05c21c65bdfed0f71a2f2ada8b84da59348c4c5d)
 Maven home: D:\apache-maven-3.8.1\bin\..
@@ -173,28 +180,37 @@ If you couldn't get an output like that, please check out these tutorials:
 2. <a href="https://maven.apache.org/install.html">Maven</a>
 
 To check if git is installed, run:
+
 ```
 git --version
 ```
+
 You should see a output like this:
+
 ```
 git version 2.31.1.windows.1
 ```
+
 The version doesn't need to be exactly this one.
 If you didn't get the output like that, please check out <a href="https://git-scm.com/downloads">this</a> link:
 
 ### Steps
 First let clone the repository. Open your terminal, nagivate to a folder of your preference using the cd command, and then enter the following command:
+
 ```
 git clone https://github.com/iwhrim/GithubAPI-Project.git
 cd GithubAPI-Project/
 ```
+
 Next, we need to generate a .jar file of the project.
 Run the following command on the terminal:
+
 ```
 mvn package
 ```
+
 This should generate a .jar file on the /target folder. The last few lines of the output should be something like this:
+
 ```
 [INFO] BUILD SUCCESS
 [INFO] --------------------------------------------
@@ -202,15 +218,21 @@ This should generate a .jar file on the /target folder. The last few lines of th
 [INFO] Finished at: 2021-04-25T14:32:29-03:00
 [INFO] ------------------------------------------
 ```
+
 Now, let's build the image:
+
 ```
 docker build --build-arg URI="<SUBSTITUTE THIS WITH YOUR URI>" -t <YOUR DOCKER USERNAME>/github-api:latest .
 ```
+
 You are going to see a output that should contain a line just like this:
+
 ```
 [+] Building 4.4s (9/9) FINISHED
 ```
+
 The next step is to run the image (please be sure that you do not have any other applications running on port 8080 and 27017):
+
 ```
 docker run -p 8080:8080 -p 27017:27017 <YOUR DOCKER USERNAME>/github-api:latest
 ```
@@ -218,6 +240,7 @@ docker run -p 8080:8080 -p 27017:27017 <YOUR DOCKER USERNAME>/github-api:latest
  ### Testing
 Since the image is running on your local machine, we are going to use the localhost url.
 First your can make a request through the terminal using curl:
+
 ```
 curl --location --request GET 'localhost:8080/statistics' \
 --header 'Content-Type: application/json' \
@@ -225,7 +248,9 @@ curl --location --request GET 'localhost:8080/statistics' \
     "url": "https://github.com/iwhrim/qa-ninja-automacao-180"
 }'
 ```
+
 You should see an output like this:
+
 ```
 [{"extension":"rb","count":29,"lines":851,"bytes":20243},{"extension":"jpg","count":28,"lines":21056,"bytes":3031412},{"extension":"txt","count":1,"lines":35,"bytes":826},{"extension":"rspec","count":1,"lines":4,"bytes":133},{"extension":"feature","count":5,"lines":152,"bytes":6347},{"extension":"gitignore","count":1,"lines":3,"bytes":24},{"extension":"md","count":1,"lines":3,"bytes":132},{"extension":"Rakefile","count":1,"lines":42,"bytes":1048},{"extension":"Gemfile","count":2,"lines":20,"bytes":430},{"extension":"lock","count":2,"lines":184,"bytes":4822},{"extension":"yml","count":5,"lines":75,"bytes":1587}]
 ```
