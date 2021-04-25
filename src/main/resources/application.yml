@@ -4,3 +4,10 @@ spring:
       uri: ${DB_URI}
 #      port: 27017
       database: GitHubApi
+
+management:
+  endpoints:
+    enabled-by-default: false
+  endpoint:
+    health:
+      enabled: true
