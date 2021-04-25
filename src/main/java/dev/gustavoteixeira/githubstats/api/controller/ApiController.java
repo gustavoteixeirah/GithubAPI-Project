@@ -10,6 +10,7 @@ import io.swagger.annotations.ApiResponses;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.CollectionUtils;
@@ -40,7 +41,7 @@ public class ApiController {
             @ApiResponse(code = 404, message = "GitHub repository not found."),
             @ApiResponse(code = 500, message = "Internal Server Error"),
     })
-    @GetMapping("/statistics")
+    @GetMapping(value = "/statistics", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<ElementDTO>> getStatistics(
             @ApiParam(value = "URL of the GitHub repository", required = true,
                     example = "https://github.com/iwhrim/qa-ninja-automacao-180")
