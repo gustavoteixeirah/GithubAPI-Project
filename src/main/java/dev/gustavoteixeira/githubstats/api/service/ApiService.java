@@ -3,7 +3,6 @@ package dev.gustavoteixeira.githubstats.api.service;
 import dev.gustavoteixeira.githubstats.api.dto.ElementDTO;
 import dev.gustavoteixeira.githubstats.api.entity.ElementEntity;
 import dev.gustavoteixeira.githubstats.api.entity.GithubRepositoryEntity;
-import dev.gustavoteixeira.githubstats.api.exception.InvalidGitHubRepositoryURL;
 import dev.gustavoteixeira.githubstats.api.exception.ProcessingError;
 import dev.gustavoteixeira.githubstats.api.repository.ElementRepository;
 import dev.gustavoteixeira.githubstats.api.repository.GithubRepository;
@@ -20,6 +19,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static dev.gustavoteixeira.githubstats.api.util.StringTransformationUtils.getRootRepository;
+import static dev.gustavoteixeira.githubstats.api.util.TimeUtils.getTimeDifference;
 
 @Service
 public class ApiService {
@@ -37,7 +37,7 @@ public class ApiService {
 
     public List<ElementDTO> getRepositoryStatistics(String repositoryURL) throws ProcessingError {
         logger.info("ApiService.getRepositoryStatistics - Start");
-        List<ElementDTO> elements = new ArrayList<>();
+
 
         // Gets the repository in the following format: <OWNER>/<REPOSITORY_NAME>
         String rootRepository = getRootRepository(repositoryURL);
@@ -81,38 +81,43 @@ public class ApiService {
                 }
             }
             logger.info("ApiService.getRepositoryStatistics - Thread finished, slept for {} seconds", threadSleepingTime);
-            // Gets out of the loop after all elements have been processed
-            elements = getElementDTOS(elements, rootRepository);
-            logger.info("ApiService.getRepositoryStatistics - Finished mapping repository");
-        } else {
-            elements = repository.getElements();
+            // Gets out of the loop after all elements have been mapped, then process the statistics and save
+            processStatisticsAndSaveElements(rootRepository);
+
+            // Gets the newly processed repository
+            repository = githubRepository.findByRootRepository(rootRepository);
+            logger.info("ApiService.getRepositoryStatistics - Finished mapping the repository: {}", rootRepository);
         }
 
         //Get the elements DTOs and return
-        return elements;
+        return repository.getElements();
     }
 
-    private List<ElementDTO> getElementDTOS(List<ElementDTO> elements, String rootRepository) {
+    private void processStatisticsAndSaveElements(String rootRepository) {
         List<ElementEntity> allByRootRepository = elementRepository.findAllByRootRepository(rootRepository);
 
-        // Converts to para um List<ElementDTO>
-        List<ElementDTO> processedElements = elements;
-
-        allByRootRepository.forEach(elementEntity -> processedElements.add(ElementDTO.builder()
-                .extension(elementEntity.getExtension())
-                .bytes(elementEntity.getBytes())
-                .lines(elementEntity.getLines())
-                .count(elementEntity.getCount()).build()));
-
-        //Pega as extensões
+        // Get files extensions
         Collection<String> extensions = new HashSet<>();
         allByRootRepository.forEach(e -> extensions.add(e.getExtension()));
 
-        // Agrupa os elementos de mesma extensao
+        // Group the elements by its extension
+        List<ElementDTO> groupedElements = groupByExtension(allByRootRepository, extensions);
+
+        // Save the elements in the database
+        githubRepository.save(
+                GithubRepositoryEntity.builder()
+                        .rootRepository(rootRepository)
+                        .elements(groupedElements)
+                        .build());
+    }
+
+    private List<ElementDTO> groupByExtension(List<ElementEntity> allByRootRepository, Collection<String> extensions) {
+        logger.debug("ApiService.groupByExtension - Start - Grouping by extension");
+        long start = System.currentTimeMillis();
         List<ElementDTO> groupedElements = new ArrayList<>();
-        List<ElementDTO> finalElements = elements;
+
         extensions.forEach(extension -> {
-            List<ElementDTO> elementsOfOneExtension = finalElements.stream().filter(element -> element.getExtension().equals(extension)).collect(Collectors.toList());
+            List<ElementDTO> elementsOfOneExtension = allByRootRepository.stream().filter(element -> element.getExtension().equals(extension)).collect(Collectors.toList());
             int count = elementsOfOneExtension.stream().mapToInt(ElementDTO::getCount).sum();
             long lines = elementsOfOneExtension.stream().mapToLong(ElementDTO::getLines).sum();
             long bytes = elementsOfOneExtension.stream().mapToLong(ElementDTO::getBytes).sum();
@@ -124,15 +129,10 @@ public class ApiService {
                     .build());
 
         });
-        elements = groupedElements;
-        // Save the elements in the database
-        githubRepository.save(
-                GithubRepositoryEntity.builder()
-                        .rootRepository(rootRepository)
-                        .elements(elements)
-                        .build());
-        return elements;
-    }
+        long end = System.currentTimeMillis();
+        logger.debug("ApiService.groupByExtension - End - Grouping by extension time: {}", getTimeDifference(start, end));
 
+        return groupedElements;
+    }
 
 }
