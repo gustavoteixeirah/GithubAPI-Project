@@ -4,6 +4,7 @@ This is my implementation of the following Technical Challenge proposed by a com
 ## The challenge:
 
 Develop an API that returns the file count, the total number of lines and the total number of bytes grouped by file extension, of a given public Github repository. As in the example below:
+```
 [
 { "extension": "java",
 "count": 4, "lines": 360,
@@ -16,6 +17,7 @@ Develop an API that returns the file count, the total number of lines and the to
 },
 …
 ]
+```
 
 Requirements:
 • Your API must be written using Java 8 or newer, ECMAscript 2015 or newer, or C# 8.0;

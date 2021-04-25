@@ -16,10 +16,11 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
 
     @ExceptionHandler(value
             = {InvalidGitHubRepositoryURL.class})
-    protected ResponseEntity<Object> handleInvalidGitHubRepositoryURL(InvalidGitHubRepositoryURL ex, WebRequest request) {
-        ErrorResponseDTO error = ex.error;
+    protected ResponseEntity<Object> handleInvalidGitHubRepositoryURL(InvalidGitHubRepositoryURL e, WebRequest request) {
+        ErrorResponseDTO error = e.error;
         error.date = ZonedDateTime.now();
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST).body(error);
     }
 
 }
