@@ -46,7 +46,7 @@ Develop an API that returns the file count, the total number of lines and the to
 The API documentation is available in the Swagger format. It is a human friendly and easy to navigate way to visualize the API’s resources documentation.
 You can access it through this link:
 <h5> <a href="https://github-api-microservice.herokuapp.com/swagger-ui.html">Documentation</a></h5>
-![alt text](https://teixeira983-images.s3.amazonaws.com/github-api-project-swagger-ui.png)
+[![Swagger documentation](https://teixeira983-images.s3.amazonaws.com/github-api-project-swagger-ui.png)]
 
 ## Guide to perform a request
 
