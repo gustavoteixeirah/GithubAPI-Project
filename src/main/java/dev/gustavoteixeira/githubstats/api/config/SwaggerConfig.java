@@ -17,6 +17,8 @@ public class SwaggerConfig {
     @Bean
     public Docket api() {
         return new Docket(DocumentationType.SWAGGER_2)
+                .useDefaultResponseMessages(false)
+                .directModelSubstitute(Object.class, java.lang.Void.class)
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("dev.gustavoteixeira.githubstats.api.controller"))
                 .paths(PathSelectors.any())

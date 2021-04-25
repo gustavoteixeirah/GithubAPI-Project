@@ -1,6 +1,7 @@
 package dev.gustavoteixeira.githubstats.api.exception.handler;
 
 import dev.gustavoteixeira.githubstats.api.dto.ErrorResponseDTO;
+import dev.gustavoteixeira.githubstats.api.exception.GitHubRepositoryNotFound;
 import dev.gustavoteixeira.githubstats.api.exception.InvalidGitHubRepositoryURL;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,11 +17,31 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
 
     @ExceptionHandler(value
             = {InvalidGitHubRepositoryURL.class})
-    protected ResponseEntity<Object> handleInvalidGitHubRepositoryURL(InvalidGitHubRepositoryURL e, WebRequest request) {
+    protected ResponseEntity<ErrorResponseDTO> handleInvalidGitHubRepositoryURL(InvalidGitHubRepositoryURL e, WebRequest request) {
         ErrorResponseDTO error = e.error;
         error.date = ZonedDateTime.now();
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    @ExceptionHandler(value
+            = {GitHubRepositoryNotFound.class})
+    protected ResponseEntity<ErrorResponseDTO> handleGitHubRepositoryNotFound(GitHubRepositoryNotFound e, WebRequest request) {
+        ErrorResponseDTO error = e.error;
+        error.date = ZonedDateTime.now();
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(value
+            = {IllegalStateException.class})
+    protected ResponseEntity<ErrorResponseDTO> handleIllegalStateException(IllegalStateException e, WebRequest request) {
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ErrorResponseDTO.builder()
+                        .message("Internal Server Error.")
+                        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .date(ZonedDateTime.now()).build());
     }
 
 }

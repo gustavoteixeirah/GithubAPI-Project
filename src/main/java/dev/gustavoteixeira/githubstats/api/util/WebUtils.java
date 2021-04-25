@@ -1,6 +1,7 @@
 package dev.gustavoteixeira.githubstats.api.util;
 
 import dev.gustavoteixeira.githubstats.api.dto.UnprocessedElementDTO;
+import dev.gustavoteixeira.githubstats.api.exception.GitHubRepositoryNotFound;
 import dev.gustavoteixeira.githubstats.api.service.ProcessorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +34,7 @@ public class WebUtils {
 
         List<String> elementListOfTheFirstPage = getGithubRepositoryElementsList(repositoryURL);
         //TODO Check se a elementListOfTheFirstPage não é null
-        List<UnprocessedElementDTO> remainingDirectories = transformFrom_elementListOfTheFirstPage_to_SendQSS_and_return_Remaining_Directories(elementListOfTheFirstPage);
+        List<UnprocessedElementDTO> remainingDirectories = transformRawElementsToUnprocessedElements(elementListOfTheFirstPage);
 
         if (!CollectionUtils.isEmpty(remainingDirectories)) {
             recursive(remainingDirectories);
@@ -47,7 +48,7 @@ public class WebUtils {
     public void recursive(List<UnprocessedElementDTO> remainingDirectory) {
         remainingDirectory.forEach(unprocessedElementDTO -> {
             List<String> elementListOfTheFirstPage = getGithubRepositoryElementsList(unprocessedElementDTO.getAddress());
-            List<UnprocessedElementDTO> newlyRemainingDirectory = transformFrom_elementListOfTheFirstPage_to_SendQSS_and_return_Remaining_Directories(elementListOfTheFirstPage);
+            List<UnprocessedElementDTO> newlyRemainingDirectory = transformRawElementsToUnprocessedElements(elementListOfTheFirstPage);
             if (!CollectionUtils.isEmpty(newlyRemainingDirectory)) {
                 recursive(newlyRemainingDirectory);
             }
@@ -71,12 +72,12 @@ public class WebUtils {
         return unprocessedElementsList;
     }
 
-    public List<UnprocessedElementDTO> transformFrom_elementListOfTheFirstPage_to_SendQSS_and_return_Remaining_Directories(List<String> elementListOfTheFirstPage) {
+    public List<UnprocessedElementDTO> transformRawElementsToUnprocessedElements(List<String> elementListOfTheFirstPage) {
         List<UnprocessedElementDTO> filesAndDirectories = getUnprocessedElementsDTO(elementListOfTheFirstPage);
 
         filesAndDirectories.forEach(element -> {
             if ((element.getType()).equals("File")) {
-                logger.info("WebUtils.transform - Processing - Starting new thread with url: {}", element.getAddress());
+                logger.info("WebUtils.transformRawElementsToUnprocessedElements - Processing - Starting new thread with url: {}", element.getAddress());
                 new Thread(() -> processorService.persistElementInfo(element.getAddress())).start();
                 count++;
             }
@@ -97,7 +98,8 @@ public class WebUtils {
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("WebUtils.getGithubRepositoryElementsList - Error - URL: {}", fullURL);
+            throw new GitHubRepositoryNotFound();
         }
 
         return elements;
@@ -108,7 +110,8 @@ public class WebUtils {
         try {
             url = new URL(fullURL);
         } catch (MalformedURLException e) {
-            e.printStackTrace();
+            logger.error("WebUtils.getUrl - Error - MalformedURLException - URL: {}", fullURL);
+            throw new RuntimeException();
         }
 
         return url;
