@@ -50,6 +50,7 @@ public class ApiController {
 
         List<ElementDTO> result = service.getRepositoryStatistics(githubRepository.getUrl());
 
+        logger.info("ApiController.getStatistics - End - Output size: {}", result.size());
         return CollectionUtils.isEmpty(result) ? ResponseEntity.noContent().build() : ResponseEntity.ok(result) ;
     }
 

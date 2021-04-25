@@ -4,6 +4,7 @@ import dev.gustavoteixeira.githubstats.api.dto.ElementDTO;
 import dev.gustavoteixeira.githubstats.api.entity.ElementEntity;
 import dev.gustavoteixeira.githubstats.api.entity.GithubRepositoryEntity;
 import dev.gustavoteixeira.githubstats.api.exception.InvalidGitHubRepositoryURL;
+import dev.gustavoteixeira.githubstats.api.exception.ProcessingError;
 import dev.gustavoteixeira.githubstats.api.repository.ElementRepository;
 import dev.gustavoteixeira.githubstats.api.repository.GithubRepository;
 import dev.gustavoteixeira.githubstats.api.util.WebUtils;
@@ -34,74 +35,102 @@ public class ApiService {
     @Autowired
     private WebUtils webUtils;
 
-    public List<ElementDTO> getRepositoryStatistics(String repositoryURL) {
+    public List<ElementDTO> getRepositoryStatistics(String repositoryURL) throws ProcessingError {
         logger.info("ApiService.getRepositoryStatistics - Start");
-
-//        List<ElementDTO> elements = DynamoDBService.retrieveItem(githubRepository.getUrl());
         List<ElementDTO> elements = new ArrayList<>();
 
-        // Ver se a URL já está mapeada no DB
+        // Gets the repository in the following format: <OWNER>/<REPOSITORY_NAME>
         String rootRepository = getRootRepository(repositoryURL);
 
+        // Checks if the repository is already mapped on the database
         GithubRepositoryEntity repository = githubRepository.findByRootRepository(rootRepository);
-        // Se não
+
+        // If it is not
         if (repository == null) {
-            logger.info("ApiService.getRepositoryStatistics - Mapping repository");
-            int items = webUtils.mapRepository(repositoryURL);
+            logger.info("ApiService.getRepositoryStatistics - Started mapping repository");
+
+            // Then map the repository (internally using threads)
+            int quantityOfMappedElements = webUtils.mapRepository(repositoryURL);
+
+            // returs the total of elements that that repository contains
+            //Obs: "element" is the name I gave to describe a file in that repository
             WebUtils.count = 0;
 
-            logger.info("ApiService.getRepositoryStatistics - Finding all elements by root repository");
+            // Get the total elements that are saved in the database
             var totalElements = elementRepository.countByRootRepository(rootRepository);
-            logger.info("ApiService.getRepositoryStatistics - Processing - Total of already processed elements: {}", totalElements);
-            // verifica se file count == total de elementos
-            while (items != totalElements) {
+
+            // Creates a variable to hold the total time that the thread will sleep
+            long threadSleepingTime = 0;
+
+            // Checks if the total saved elements is equal to the quantity of mapped elements
+            while (quantityOfMappedElements != totalElements) {
+
+                logger.info("ApiService.getRepositoryStatistics - quantityOfMappedElements: {} - totalElements : {}", quantityOfMappedElements, totalElements);
+                // Updates the total elements variable
                 totalElements = elementRepository.countByRootRepository(rootRepository);
-                // Espera 2min ~ 4min
+
+                // Wait a few milliseconds (usually it sleeps between 250 - 400 milliseconds)
+                if (threadSleepingTime == 0)
+                    logger.info("ApiService.getRepositoryStatistics - Thread will start to sleep");
                 try {
-                    Thread.sleep(200);
+                    Thread.sleep(50);
+                    threadSleepingTime += 50;
                 } catch (InterruptedException e) {
-                    logger.error("ApiService.getRepositoryStatistics - Error - Error while trying to get the thread to sleep");
+                    logger.error("ApiService.getRepositoryStatistics - Error - Error while trying to get the thread to sleep: {}", e.getMessage());
+                    throw new ProcessingError();
                 }
             }
-            logger.info("ApiService.getRepositoryStatistics - Processing - Total of already processed elements: {}", totalElements);
-            // Busca o Element
-            List<ElementEntity> allByRootRepository = elementRepository.findAllByRootRepository(rootRepository);
-
-            // elements = Converte para um List<ElementDTO>
-            List<ElementDTO> finalElements1 = elements;
-            allByRootRepository.forEach(elementEntity -> {
-                finalElements1.add(ElementDTO.builder()
-                        .extension(elementEntity.getExtension())
-                        .bytes(elementEntity.getBytes())
-                        .lines(elementEntity.getLines())
-                        .count(elementEntity.getCount()).build());
-            });
-            //Pega as extensões
-            Collection<String> extensions = new HashSet<>();
-            allByRootRepository.forEach(e -> extensions.add(e.getExtension()));
-
-            // Agrupa os elementos de mesma extensao
-            List<ElementDTO> groupedElements = new ArrayList<>();
-            List<ElementDTO> finalElements = elements;
-            extensions.forEach(extension -> {
-                List<ElementDTO> elementsOfOneExtension = finalElements.stream().filter(element -> element.getExtension().equals(extension)).collect(Collectors.toList());
-                int count = elementsOfOneExtension.stream().mapToInt(ElementDTO::getCount).sum();
-                long lines = elementsOfOneExtension.stream().mapToLong(ElementDTO::getLines).sum();
-                long bytes = elementsOfOneExtension.stream().mapToLong(ElementDTO::getBytes).sum();
-                groupedElements.add(ElementDTO.builder()
-                        .extension(extension)
-                        .count(count)
-                        .lines(lines)
-                        .bytes(bytes)
-                        .build());
-
-            });
-            elements = groupedElements;
-            logger.info("ApiService.getRepositoryStatistics - Finished");
-            githubRepository.save(GithubRepositoryEntity.builder().rootRepository(rootRepository).elements(elements).build());
+            logger.info("ApiService.getRepositoryStatistics - Thread finished, slept for {} seconds", threadSleepingTime);
+            // Gets out of the loop after all elements have been processed
+            elements = getElementDTOS(elements, rootRepository);
+            logger.info("ApiService.getRepositoryStatistics - Finished mapping repository");
         } else {
             elements = repository.getElements();
         }
+
+        //Get the elements DTOs and return
+        return elements;
+    }
+
+    private List<ElementDTO> getElementDTOS(List<ElementDTO> elements, String rootRepository) {
+        List<ElementEntity> allByRootRepository = elementRepository.findAllByRootRepository(rootRepository);
+
+        // Converts to para um List<ElementDTO>
+        List<ElementDTO> processedElements = elements;
+
+        allByRootRepository.forEach(elementEntity -> processedElements.add(ElementDTO.builder()
+                .extension(elementEntity.getExtension())
+                .bytes(elementEntity.getBytes())
+                .lines(elementEntity.getLines())
+                .count(elementEntity.getCount()).build()));
+
+        //Pega as extensões
+        Collection<String> extensions = new HashSet<>();
+        allByRootRepository.forEach(e -> extensions.add(e.getExtension()));
+
+        // Agrupa os elementos de mesma extensao
+        List<ElementDTO> groupedElements = new ArrayList<>();
+        List<ElementDTO> finalElements = elements;
+        extensions.forEach(extension -> {
+            List<ElementDTO> elementsOfOneExtension = finalElements.stream().filter(element -> element.getExtension().equals(extension)).collect(Collectors.toList());
+            int count = elementsOfOneExtension.stream().mapToInt(ElementDTO::getCount).sum();
+            long lines = elementsOfOneExtension.stream().mapToLong(ElementDTO::getLines).sum();
+            long bytes = elementsOfOneExtension.stream().mapToLong(ElementDTO::getBytes).sum();
+            groupedElements.add(ElementDTO.builder()
+                    .extension(extension)
+                    .count(count)
+                    .lines(lines)
+                    .bytes(bytes)
+                    .build());
+
+        });
+        elements = groupedElements;
+        // Save the elements in the database
+        githubRepository.save(
+                GithubRepositoryEntity.builder()
+                        .rootRepository(rootRepository)
+                        .elements(elements)
+                        .build());
         return elements;
     }
 

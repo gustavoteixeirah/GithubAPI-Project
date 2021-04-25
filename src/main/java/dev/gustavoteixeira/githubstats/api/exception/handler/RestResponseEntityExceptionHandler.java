@@ -3,6 +3,7 @@ package dev.gustavoteixeira.githubstats.api.exception.handler;
 import dev.gustavoteixeira.githubstats.api.dto.ErrorResponseDTO;
 import dev.gustavoteixeira.githubstats.api.exception.GitHubRepositoryNotFound;
 import dev.gustavoteixeira.githubstats.api.exception.InvalidGitHubRepositoryURL;
+import dev.gustavoteixeira.githubstats.api.exception.ProcessingError;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -42,6 +43,16 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
                         .message("Internal Server Error.")
                         .status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .date(ZonedDateTime.now()).build());
+    }
+
+    @ExceptionHandler(value
+            = {ProcessingError.class})
+    protected ResponseEntity<ErrorResponseDTO> handleProcessingError(ProcessingError e, WebRequest request) {
+        ErrorResponseDTO error = e.error;
+        error.date = ZonedDateTime.now();
+        error.message = error.message.concat(e.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
 
 }

@@ -21,9 +21,4 @@ public class StringTransformationUtils {
         }
     }
 
-//    public static String getRawRepository(String fullRepositoryURL) {
-//        String s;
-//
-//    }
-
 }

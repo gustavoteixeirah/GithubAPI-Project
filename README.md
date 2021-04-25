@@ -265,4 +265,3 @@ You should see an output like this:
 ```
 [{"extension":"rb","count":29,"lines":851,"bytes":20243},{"extension":"jpg","count":28,"lines":21056,"bytes":3031412},{"extension":"txt","count":1,"lines":35,"bytes":826},{"extension":"rspec","count":1,"lines":4,"bytes":133},{"extension":"feature","count":5,"lines":152,"bytes":6347},{"extension":"gitignore","count":1,"lines":3,"bytes":24},{"extension":"md","count":1,"lines":3,"bytes":132},{"extension":"Rakefile","count":1,"lines":42,"bytes":1048},{"extension":"Gemfile","count":2,"lines":20,"bytes":430},{"extension":"lock","count":2,"lines":184,"bytes":4822},{"extension":"yml","count":5,"lines":75,"bytes":1587}]
 ```
-
