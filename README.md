@@ -136,7 +136,18 @@ The expected output in this case is a array containing the file count, the total
 
 ## Running with Docker
 
-I have provided a Dockerfile that you can run this application with a provider like Docker, for example.
+I have provided a Dockerfile that you can build this application with a provider like Docker, for example.
+However, if you do not want to build this application from zero, you can just type the following command in your terminal.
+
+```
+docker run -p 8080:8080 -p 27017:27017 teixeira963/github-api:latest
+```
+
+Attention: Please be sure that you do not have any other applications running on port 8080 and 27017).
+Attention: You must have Docker installed and that you are able to access it though a terminal. If you haven't, you can follow <a href="https://docs.docker.com/desktop/">this</a> tutorial.
+<p>
+Now please skip to the "Testing" section or, to build the Docker image from zero, follow the next steps, starting with the prerequisites.
+
 ### Prerequisites
 In order to use, first you are going to need a MongoDB connection string (I recommend MongoDB Atlas, that is the one I used in this project) in the following format:
 
