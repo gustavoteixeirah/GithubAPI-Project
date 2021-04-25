@@ -38,7 +38,7 @@ public class ProcessorService {
         e.setCount(elementInfo.getCount());
         e.setLines(elementInfo.getLines());
         e.setExtension(elementInfo.getExtension());
-        elementRepository.insert(e);
+        elementRepository.save(e);
         logger.info("ElementRepository.persistElementInfo - Finished {}", elementInfo.getRepository());
     }
 
@@ -63,6 +63,12 @@ public class ProcessorService {
             element.setCount(1);
         } catch (IOException e) {
             e.printStackTrace();
+            //TODO clear data of the root repository fullURL
+
+            //TODO log error
+
+            //TODO Throw error and return 500 internal server error
+
         }
         return element;
     }

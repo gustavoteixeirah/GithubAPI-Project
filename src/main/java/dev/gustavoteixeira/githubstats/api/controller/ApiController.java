@@ -25,6 +25,7 @@ public class ApiController {
 
     @GetMapping("/")
     public ResponseEntity<List<ElementDTO>> getStatistics(@RequestBody GithubRepositoryDTO githubRepository) {
+        // TODO Validate input / sanitize / @Validated
         logger.info("ApiController.getStatistics - Start - Input URL: {}", githubRepository.getUrl());
         List<ElementDTO> result = null;
 

@@ -11,8 +11,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static dev.gustavoteixeira.githubstats.api.util.StringTransformationUtils.getRootRepository;
@@ -54,7 +56,7 @@ public class ApiService {
             // verifica se file count == total de elementos
             while (items != totalElements) {
                 totalElements = elementRepository.countByRootRepository(rootRepository);
-            // Espera 2min ~ 4min
+                // Espera 2min ~ 4min
                 try {
                     Thread.sleep(200);
                 } catch (InterruptedException e) {
@@ -96,7 +98,7 @@ public class ApiService {
             });
             elements = groupedElements;
             logger.info("ApiService.getRepositoryStatistics - Finished");
-            githubRepository.insert(GithubRepositoryEntity.builder().rootRepository(rootRepository).elements(elements).build());
+            githubRepository.save(GithubRepositoryEntity.builder().rootRepository(rootRepository).elements(elements).build());
         } else {
             elements = repository.getElements();
         }
