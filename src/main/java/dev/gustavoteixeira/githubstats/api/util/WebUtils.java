@@ -2,6 +2,7 @@ package dev.gustavoteixeira.githubstats.api.util;
 
 import dev.gustavoteixeira.githubstats.api.dto.UnprocessedElementDTO;
 import dev.gustavoteixeira.githubstats.api.exception.GitHubRepositoryNotFound;
+import dev.gustavoteixeira.githubstats.api.exception.InvalidGitHubRepositoryURL;
 import dev.gustavoteixeira.githubstats.api.exception.ProcessingError;
 import dev.gustavoteixeira.githubstats.api.service.ProcessorService;
 import org.slf4j.Logger;
@@ -112,7 +113,7 @@ public class WebUtils {
             url = new URL(fullURL);
         } catch (MalformedURLException e) {
             logger.error("WebUtils.getUrl - Error - MalformedURLException - URL: {}", fullURL);
-            throw new ProcessingError();
+            throw new InvalidGitHubRepositoryURL();
         }
 
         return url;
