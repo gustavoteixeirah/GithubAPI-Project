@@ -3,6 +3,7 @@ package dev.gustavoteixeira.githubstats.api.service;
 import dev.gustavoteixeira.githubstats.api.dto.ElementDTO;
 import dev.gustavoteixeira.githubstats.api.entity.ElementEntity;
 import dev.gustavoteixeira.githubstats.api.entity.GithubRepositoryEntity;
+import dev.gustavoteixeira.githubstats.api.exception.InvalidGitHubRepositoryURL;
 import dev.gustavoteixeira.githubstats.api.repository.ElementRepository;
 import dev.gustavoteixeira.githubstats.api.repository.GithubRepository;
 import dev.gustavoteixeira.githubstats.api.util.WebUtils;
@@ -45,7 +46,6 @@ public class ApiService {
         GithubRepositoryEntity repository = githubRepository.findByRootRepository(rootRepository);
         // Se não
         if (repository == null) {
-
             logger.info("ApiService.getRepositoryStatistics - Mapping repository");
             int items = webUtils.mapRepository(repositoryURL);
             WebUtils.count = 0;
