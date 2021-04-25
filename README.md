@@ -33,7 +33,7 @@ Develop an API that returns the file count, the total number of lines and the to
 2. Data must be retrieved from Github website by using web scraping techniques. Do not use Github’s API or download the source code as a ZIP file; do not use web scraping libraries. We would like to know your ideas on how it can be done; \[ Development status \] : <span style="color:#37eb34">OK</span>
 3. Your API must support thousands of concurrent requests; \[ Development status \] : <span style="color:#f54761">Not implemented</span>
 4. We think it’s ok if the first request to a particular repository takes some time to respond (since you depend on Github website response times), but we don’t expect the subsequent requests to be long; \[ Development status \] : <span style="color:#37eb34">OK</span>
-5. We don’t expect to get timeout errors; \[ Development status \] : <span style="color:#eef772">Partially supported, depending on the quantity of files of the repository</span>
+5. We don’t expect to get timeout errors; \[ Development status \] : <span style="color:#eef772">Partially supported, depending on the quantity of files of the repository</span> Please do not use the torvalds/linux repository or any other gigantic repository for now... :)
 6. We must understand your code and use your API without having to ask you any questions. Our primary language is English so please use it on comments and documentation; \[ Development status \] : <span style="color:#eef772">Partially implemented</span>
 7. We’d like to see SOLID principles in your solution; \[ Development status \] : <span style="color:#eef772">Partially implemented</span>
 8. You are free to choose your API contracts (parameters and response formats) but we’d like to be able to integrate it with any other existing solutions; \[ Development status \] : <span style="color:#eef772">Partially implemented</span>
@@ -50,6 +50,7 @@ You can access it through this link:
 ## Guide to perform a request
 
 A simple and easy way to perform a request is to use <a href="https://curl.se/">curl</a> in a terminal.
+The following example shows a curl command to get the statistics of the "iwhrim/qa-ninja-automacao-180" GitHub repository.
 
 ```
 curl --location --request GET 'https://github-api-microservice.herokuapp.com/statistics' \
