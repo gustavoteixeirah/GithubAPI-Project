@@ -1,0 +1,6 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb+srv://user:pwd@mongodb-cluster.xqjcn.gcp.mongodb.net/GitHubApi?retryWrites=true&w=majority
+#      port: 27017
+      database: GitHubApi
