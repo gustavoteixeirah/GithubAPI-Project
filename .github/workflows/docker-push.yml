@@ -92,7 +92,7 @@ jobs:
 
   notifySlack:
     runs-on: ubuntu-18.04
-    needs: [docker]
+    needs: [dockerHub]
 
     steps:
       - name: Notify slack
