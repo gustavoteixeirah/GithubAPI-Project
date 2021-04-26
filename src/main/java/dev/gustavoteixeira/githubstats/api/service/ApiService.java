@@ -65,7 +65,7 @@ public class ApiService {
             // Checks if the total saved elements is equal to the quantity of mapped elements
             while (quantityOfMappedElements != totalElements) {
 
-                logger.info("ApiService.getRepositoryStatistics - quantityOfMappedElements: {} - totalElements : {}", quantityOfMappedElements, totalElements);
+                logger.debug("ApiService.getRepositoryStatistics - quantityOfMappedElements: {} - totalElements : {}", quantityOfMappedElements, totalElements);
                 // Updates the total elements variable
                 totalElements = elementRepository.countByRootRepository(rootRepository);
 
@@ -80,6 +80,7 @@ public class ApiService {
                     throw new ProcessingError();
                 }
             }
+
             logger.info("ApiService.getRepositoryStatistics - Thread finished, slept for {} seconds", threadSleepingTime);
             // Gets out of the loop after all elements have been mapped, then process the statistics and save
             processStatisticsAndSaveElements(rootRepository);
