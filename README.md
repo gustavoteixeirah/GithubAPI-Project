@@ -39,7 +39,7 @@ Develop an API that returns the file count, the total number of lines and the to
 8. You are free to choose your API contracts (parameters and response formats) but we’d like to be able to integrate it with any other existing solutions; \[ Development status \] : <span style="color:#eef772">Partially implemented</span>
 9. You don’t need to persist any data (but feel free to do it if you want);  \[ Development status \] : <span style="color:#37eb34">OK, implemented for performance increase after the first request of same repository</span>
 10. We’d like to see at least one automated test;  \[ Development status \] : <span style="color:#f54761">Not implemented</span>
-11. You must deploy your solution to a cloud provider like Amazon AWS or Heroku and send us the link to access it. It’s a plus if you publish a Docker image with your application (including its dependencies) in a registry like Docker Hub and let us know how to get it. \[ Development status \] : <span style="color:#37eb34">Partially. Deployed on Heroku. Dockerfile is in development.</span>
+11. You must deploy your solution to a cloud provider like Amazon AWS or Heroku and send us the link to access it. It’s a plus if you publish a Docker image with your application (including its dependencies) in a registry like Docker Hub and let us know how to get it. \[ Development status \] : <span style="color:#37eb34">OK. Deployed on Heroku. Dockerfile OK and image available on DockerHub <a href="https://hub.docker.com/r/teixeira963/github-api">teixeira/github-api</a>.</span>
 
 
 ## API Documentation
