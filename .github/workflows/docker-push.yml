@@ -54,12 +54,13 @@ jobs:
 #        env:
 #          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  docker:
+  dockerHub:
     name: Publish on Docker Hub
     runs-on: ubuntu-18.04
     needs: [test]
     env:
       REPO: teixeira963
+
     steps:
       - uses: actions/checkout@v2
 
@@ -88,3 +89,15 @@ jobs:
             teixeira963/github-api:latest
             teixeira963/github-api:${{ github.run_number }}
           push: true
+
+  notifySlack:
+    runs-on: ubuntu-18.04
+    needs: [docker]
+
+    steps:
+      - name: Notify slack
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        uses: abinoda/slack-action@master
+        with:
+          args: '{\"channel\":\"C01VA672CJH\",\"blocks\":[{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"Successfully deployed on Heroku!\"}}]}'
