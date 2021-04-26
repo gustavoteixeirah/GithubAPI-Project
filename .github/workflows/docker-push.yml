@@ -101,3 +101,16 @@ jobs:
         uses: abinoda/slack-action@master
         with:
           args: '{\"channel\":\"C01VA672CJH\",\"blocks\":[{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"Successfully deployed on Docker Hub!\"}}]}'
+
+  notifySlackIfFailure:
+    runs-on: ubuntu-18.04
+    needs: [dockerHub]
+    if: failure()
+
+    steps:
+      - name: Notify slack
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        uses: abinoda/slack-action@master
+        with:
+          args: '{\"channel\":\"C01VA672CJH\",\"blocks\":[{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"*Failed* deployment on Docker Hub!\"}}]}'

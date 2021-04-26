@@ -13,7 +13,7 @@ public class StringTransformationUtilsTest {
     public void githubURLShoulReturnRepoOwnerAndRepoName() {
         String testURL = "https://github.com/iwhrim/InMoov-URI";
         String result = StringTransformationUtils.getRootRepository(testURL);
-        assertThat(result).isEqualTo("iwhrim/InMoov-URI");
+        assertThat(result).isEqualTo("iwhrim/InMoov-URIa");
     }
 
     @Test
