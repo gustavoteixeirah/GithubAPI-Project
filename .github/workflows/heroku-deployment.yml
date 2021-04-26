@@ -37,3 +37,29 @@ jobs:
         heroku_api_key: ${{secrets.HEROKU_API_KEY}}
         heroku_email: ${{secrets.HEROKU_EMAIL}}
         heroku_app_name: ${{secrets.HEROKU_APP}}
+
+
+  notifySlack:
+    runs-on: ubuntu-18.04
+    needs: [heroku]
+
+    steps:
+      - name: Notify slack
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        uses: abinoda/slack-action@master
+        with:
+          args: '{\"channel\":\"C01VA672CJH\",\"blocks\":[{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"*Successfully* deployed on Heroku!\"}}]}'
+
+
+  notifySlackIfFailure:
+    runs-on: ubuntu-18.04
+
+    steps:
+      - name: Notify slack
+        if: ${{ failure() }}
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        uses: abinoda/slack-action@master
+        with:
+          args: '{\"channel\":\"C01VA672CJH\",\"blocks\":[{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"*Failed* deployment on Heroku!\"}}]}'

@@ -1,4 +1,4 @@
-name: Deploy on DockerHub
+name: Deploy on Docker Hub
 
 on:
   push:
@@ -100,4 +100,4 @@ jobs:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
         uses: abinoda/slack-action@master
         with:
-          args: '{\"channel\":\"C01VA672CJH\",\"blocks\":[{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"Successfully deployed on Heroku!\"}}]}'
+          args: '{\"channel\":\"C01VA672CJH\",\"blocks\":[{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"Successfully deployed on Docker Hub!\"}}]}'
