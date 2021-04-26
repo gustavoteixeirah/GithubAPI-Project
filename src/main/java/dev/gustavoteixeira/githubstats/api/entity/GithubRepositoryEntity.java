@@ -1,6 +1,5 @@
 package dev.gustavoteixeira.githubstats.api.entity;
 
-import dev.gustavoteixeira.githubstats.api.dto.Element;
 import dev.gustavoteixeira.githubstats.api.dto.ElementDTO;
 import lombok.Builder;
 import lombok.Getter;

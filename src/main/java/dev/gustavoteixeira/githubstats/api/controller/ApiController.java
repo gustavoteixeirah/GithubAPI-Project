@@ -18,7 +18,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import java.util.Collections;
 import java.util.List;
 
 @Controller
@@ -51,7 +50,7 @@ public class ApiController {
         List<ElementDTO> result = service.getRepositoryStatistics(githubRepository.getUrl());
 
         logger.info("ApiController.getStatistics - End - Output size: {}", result.size());
-        return CollectionUtils.isEmpty(result) ? ResponseEntity.noContent().build() : ResponseEntity.ok(result) ;
+        return CollectionUtils.isEmpty(result) ? ResponseEntity.noContent().build() : ResponseEntity.ok(result);
     }
 
 }

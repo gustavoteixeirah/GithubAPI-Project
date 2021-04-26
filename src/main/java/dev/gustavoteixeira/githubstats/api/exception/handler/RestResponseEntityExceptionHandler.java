@@ -40,7 +40,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ErrorResponseDTO.builder()
-                        .message("Internal Server Error.")
+                        .message(e.getMessage())
                         .status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .date(ZonedDateTime.now()).build());
     }

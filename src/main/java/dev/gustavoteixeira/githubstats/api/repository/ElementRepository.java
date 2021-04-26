@@ -11,6 +11,4 @@ public interface ElementRepository extends MongoRepository<ElementEntity, String
 
     List<ElementEntity> findAllByRootRepository(String rootRepository);
 
-    Long countByRootRepository(String rootRepository);
-
 }

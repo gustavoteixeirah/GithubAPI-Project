@@ -25,26 +25,34 @@ import static org.apache.commons.lang3.StringUtils.substringBetween;
 @Service
 public class WebUtils {
     private static Logger logger = LoggerFactory.getLogger(WebUtils.class);
-    public static int count = 0;
 
     @Autowired
     private ProcessorService processorService;
 
-    public int mapRepository(String repositoryURL) {
+    public void mapRepository(String repositoryURL) {
         logger.info("WebUtils.mapRepository - Start - Processing");
         long start = System.currentTimeMillis();
 
         List<String> elementListOfTheFirstPage = getGithubRepositoryElementsList(repositoryURL);
-        //TODO Check se a elementListOfTheFirstPage não é null
-        List<UnprocessedElementDTO> remainingDirectories = transformRawElementsToUnprocessedElements(elementListOfTheFirstPage);
+        if (elementListOfTheFirstPage.size() != 0) {
+            List<UnprocessedElementDTO> remainingDirectories = transformRawElementsToUnprocessedElements(elementListOfTheFirstPage);
 
-        if (!CollectionUtils.isEmpty(remainingDirectories)) {
-            recursive(remainingDirectories);
+            if (!CollectionUtils.isEmpty(remainingDirectories)) {
+                recursive(remainingDirectories);
+            }
+
+            // Put the thread to sleep to guarantee that all the previous threads will be done
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                logger.error("ApiService.getRepositoryStatistics - Error - Error while trying to get the thread to sleep: {}", e.getMessage());
+                throw new ProcessingError();
+            }
+
         }
 
         long end = System.currentTimeMillis();
         logger.info("WebUtils.mapRepository - End - Processing time: {}", getTimeDifference(start, end));
-        return count;
     }
 
     public void recursive(List<UnprocessedElementDTO> remainingDirectory) {
@@ -81,7 +89,6 @@ public class WebUtils {
             if ((element.getType()).equals("File")) {
                 logger.info("WebUtils.transformRawElementsToUnprocessedElements - Processing - Starting new thread with url: {}", element.getAddress());
                 new Thread(() -> processorService.persistElementInfo(element.getAddress())).start();
-                count++;
             }
         });
 
