@@ -2,8 +2,8 @@ package dev.gustavoteixeira.githubstats.api.service;
 
 import dev.gustavoteixeira.githubstats.api.dto.Element;
 import dev.gustavoteixeira.githubstats.api.entity.ElementEntity;
+import dev.gustavoteixeira.githubstats.api.exception.ProcessingError;
 import dev.gustavoteixeira.githubstats.api.repository.ElementRepository;
-import dev.gustavoteixeira.githubstats.api.repository.GithubRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,15 +15,11 @@ import java.net.URL;
 
 import static dev.gustavoteixeira.githubstats.api.util.StringTransformationUtils.getRootRepository;
 
-
 @Service
 public class ProcessorService {
 
     @Autowired
     private ElementRepository elementRepository;
-
-    @Autowired
-    private GithubRepository repository;
 
     private static Logger logger = LoggerFactory.getLogger(ProcessorService.class);
 
@@ -39,19 +35,18 @@ public class ProcessorService {
         e.setLines(elementInfo.getLines());
         e.setExtension(elementInfo.getExtension());
         elementRepository.save(e);
-        logger.info("ElementRepository.persistElementInfo - Finished {}", elementInfo.getRepository());
     }
 
     public static Element getElementInfo(String fullURL) {
         String normalizedURL = fullURL
                 .replace("https://www.github.com", "https://raw.githubusercontent.com")
                 .replace("blob/", "");
-        logger.info("SQSService.getElementInfo - Start with URL: {}", normalizedURL);
+        logger.info("ProcessorService.getElementInfo - Start with URL: {}", normalizedURL);
         return getStatistics(normalizedURL);
     }
 
     public static Element getStatistics(String fullURL) {
-        String result = "";
+
         Element element = new Element();
         try (var inputStream = getUrl(fullURL).openStream()) {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -62,13 +57,8 @@ public class ProcessorService {
             element.setExtension(getFileExtension(fullURL));
             element.setCount(1);
         } catch (IOException e) {
-            e.printStackTrace();
-            //TODO clear data of the root repository fullURL
-
-            //TODO log error
-
-            //TODO Throw error and return 500 internal server error
-
+            logger.error("ProcessorService.getStatistics - Error while trying to process the following url: {}", fullURL);
+            throw new ProcessingError();
         }
         return element;
     }
